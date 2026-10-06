@@ -31,6 +31,7 @@ nhanes_analysis |>
     mean_bmi = round(mean(BMI), 1),
     .groups = "drop"
   )
+
 ```
 
 
