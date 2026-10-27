@@ -1,0 +1,102 @@
+```{r}
+library(tidyverse)
+
+candidate_paths <- c(
+  "examples/nhanes-equity/data/nhanes_equity_v6.csv",
+  "../../examples/nhanes-equity/data/nhanes_equity_v6.csv"
+)
+
+data_path <- candidate_paths[file.exists(candidate_paths)][1]
+if (is.na(data_path)) {
+  stop("Could not find examples/nhanes-equity/data/nhanes_equity_v6.csv")
+}
+
+nhanes <- read_csv(data_path, show_col_types = FALSE)
+```
+
+```{r}
+library(ggplot2)
+
+bmi_by_income_cycle <- nhanes |>
+  filter(
+    !is.na(BMI),
+    !is.na(IncomeGroup),
+    !is.na(Cycle),
+    Age >= 20,
+    Age <= 80
+  ) |>
+  group_by(Cycle, IncomeGroup) |>
+  summarise(
+    n = n(),
+    mean_bmi = mean(BMI),
+    .groups = "drop"
+  ) |>
+  filter(n >= 30)
+
+bmi_by_income_cycle
+```
+
+```{r}
+corrected_plot <- ggplot(
+  bmi_by_income_cycle,
+  aes(
+    x = Cycle,
+    y = mean_bmi,
+    color = IncomeGroup,
+    group = IncomeGroup
+  )
+) +
+  geom_line(linewidth = 0.8) +
+  geom_point(size = 3) +
+  scale_color_brewer(palette = "Dark2") +
+  labs(
+    title = "Average BMI by income group across NHANES cycles",
+    subtitle = paste(
+      "Adults aged 20–80 in the prepared class dataset",
+      "Unweighted means within each income group and cycle",
+      sep = "\n"
+    ),
+    x = "NHANES survey cycle",
+    y = expression("Mean BMI (kg/" * m^2 * ")"),
+    color = "Income group",
+    caption = paste(
+      "Source: course-provided NHANES CSV snapshot.",
+      "Exclusions: [replace with the actual exclusions in your preparation code].",
+      "Means hide variation within groups; results are unweighted and are not population estimates.",
+      "Lines connect group summaries across cycles, not individual participants.",
+      sep = "\n"
+    )
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "bottom",
+    panel.grid.minor = element_blank(),
+    plot.caption = element_text(
+      hjust = 0,
+      size = 9,
+      margin = margin(t = 10)
+    )
+  )
+
+corrected_plot
+```
+```{r}
+dir.create(
+  "assignments/assignment05-visualization/submission",
+  recursive = TRUE,
+  showWarnings = FALSE
+)
+
+ggsave(
+  filename = paste0(
+    "assignments/assignment05-visualization/submission/",
+    "corrected-plot.png"
+  ),
+  plot = corrected_plot,
+  width = 10,
+  height = 7,
+  dpi = 300,
+  bg = "white"
+)
+```
