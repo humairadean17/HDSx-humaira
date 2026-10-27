@@ -1,0 +1,1 @@
+I used AI to help develop and revise the R code, improve plot labels and captions, and draft the visualization audit. I ran the code to check that it worked and visually reviewed all plots and graphs for accuracy and clarity.
